@@ -26,14 +26,19 @@ passport.use(
         clientSecret: keys.googleClientSecret,
         callbackURL: '/auth/google/callback'
     }, async (accessToken, refreshToken, profile, done) => {
-        // saving profile.id to authenticate in future
-        const existingUser = await UserModel.findOne({ googleID: profile.id });
-
-        if (!existingUser) {
-            const newUser = await new UserModel({ googleID: profile.id }).save();
-            done(null, newUser);
-        } else {
-            done(null, existingUser);
+        
+        try {
+            // saving profile.id to authenticate in future
+            const existingUser = await UserModel.findOne({ googleID: profile.id });
+    
+            if (!existingUser) {
+                const newUser = await new UserModel({ googleID: profile.id }).save();
+                done(null, newUser);
+            } else {
+                done(null, existingUser);
+            }
+        } catch(e) {
+            done(e, null);
         }
     }
     ));
