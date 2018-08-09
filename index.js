@@ -3,11 +3,13 @@ const config = require('./config/');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
+const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session'); // store seesion in a cookie
 // apart from express-cookie that store only userId, session is stored in session store 
 const app = express();
 const PORT = process.env.PORT || 3090;
 
+app.use(bodyParser.json());
 app.use(morgan('combined'));
 app.use(cookieSession({
     maxAge: 30 * 24 * 60 *60 *1000, // 30 days
@@ -24,6 +26,7 @@ mongoose.connect(config.mongoURI);
 require('./services/passport.service');
 // routes
 require('./routes/auth.routes')(app);
+require('./routes/billing.routes')(app);
 
 // launch server
 app.listen(PORT, () => {
