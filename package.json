@@ -11,7 +11,9 @@
     "start": "export NODE_ENV=production || set NODE_ENV=production && nodemon index.js",
     "server": "export NODE_ENV=development || set NODE_ENV=development && nodemon index.js",
     "client": "npm run start --prefix ../client",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "client:build": "npm run build --prefix ../client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "prod": "concurrently \"npm run start\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
