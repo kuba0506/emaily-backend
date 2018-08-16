@@ -20,6 +20,7 @@ app.use(passport.session());
 
 // db setup
 require('./models/user.model');
+require('./models/survey.model');
 mongoose.connect(config.mongoURI);
 
 // services
@@ -27,6 +28,7 @@ require('./services/passport.service');
 // routes
 require('./routes/auth.routes')(app);
 require('./routes/billing.routes')(app);
+require('./routes/survey.routes')(app);
 
 if (process.env.NODE_ENV === 'production') {
     // Express will serve up prod assets, like main.js or main.css

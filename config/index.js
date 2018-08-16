@@ -1,8 +1,6 @@
-const env = process.env.NODE_ENV.trim();
+console.log(`Running app in ${process.env.NODE_ENV} envirnoment`)
 
-console.log(`Running app in ${env} envirnoment`)
-
-if (env === 'production') {
+if (process.env.NODE_ENV == 'production') {
     console.log('loading prod keys ....')
     module.exports = require('./prod');
 } else {
