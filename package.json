@@ -12,8 +12,10 @@
     "server": "export NODE_ENV=development || set NODE_ENV=development && nodemon index.js",
     "client": "npm run start --prefix ../client",
     "client:build": "npm run build --prefix ../client",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "prod": "concurrently \"npm run start\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run local-tunnel-forever\"",
+    "prod": "concurrently \"npm run start\" \"npm run client\"",
+    "local-tunnel": "lt -p 3090 -s asdoasjdpo1123",
+    "local-tunnel-forever": "forever sendrig_webhook.js"
   },
   "keywords": [],
   "author": "",
@@ -23,11 +25,15 @@
     "concurrently": "^3.6.0",
     "cookie-session": "^2.0.0-beta.3",
     "express": "^4.16.3",
+    "forever": "^0.15.3",
+    "localtunnel": "^1.9.0",
+    "lodash": "^4.17.10",
     "mongoose": "^5.2.4",
     "morgan": "^1.9.0",
     "nodemon": "^1.18.2",
     "passport": "^0.4.0",
     "passport-google-oauth20": "^1.0.0",
+    "path-parser": "^4.2.0",
     "sendgrid": "^5.2.3",
     "stripe": "^6.6.0"
   }

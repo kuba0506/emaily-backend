@@ -1,3 +1,6 @@
+const _ = require('lodash');
+const PathParser = require('path-parser').default;
+const { URL } = require('url'); // default node module, help parsing urls
 const mongoose = require('mongoose');
 const requireLogin = require('../middlewares/requireLogin.middleware');
 const requireCredits = require('../middlewares/requireCredits.middleware');
@@ -8,6 +11,48 @@ const Survey = mongoose.model('surveys'); // different approach then requireing 
 // better for testing
 
 module.exports = (app) => {
+    app.get('/api/surveys/:surveyId/:choice', (req, res) => {
+        return res.send('Thanks for voting!');
+    });
+
+    // for local tunnel  - sendGrid
+    app.post('/api/surveys/webhooks', (req, res) => {
+        // extract route without domain
+        const p = new PathParser('/api/surveys/:surveyId/:choice');
+
+        _.chain(req.body)
+            .map(({ url, email }) => {
+                // extract surveyId and choice from pathname
+                // returns an object { surveyId: ..., choice: ... } or null
+                const match = p.test(new URL(url).pathname);
+
+                return match ? ({
+                    email,
+                    surveyId: match.surveyId,
+                    choice: match.choice
+                }) : null;
+            })
+            // compact fn remove all undefined elements
+            .compact()
+            // remove duplicate emails and surveyIds
+            .uniqBy('email', 'surveyId')
+            .each(({ surveyId, email, choice }) => {
+                // find survey, email and voted
+                Survey.updateOne({
+                    _id: surveyId, // mongodb save id under _id
+                    recipients: {
+                        $elemMatch: { email: email, voted: false }
+                    }
+                }, {
+                        $inc: { [choice]: 1 },  // yes || no
+                        $set: { 'recipients.$.voted': true }, // $ - elemmatch
+                        lastVoted: new Date()
+                    }).exec(); // save changes to db
+            })
+            .value();
+
+        return res.send({});
+    });
 
     app.post('/api/surveys', requireLogin, requireCredits, async (req, res) => {
         // 1. Is user logged in ? -> requireLogin middleware
@@ -25,7 +70,7 @@ module.exports = (app) => {
 
         // create and send email
         const mailer = new Mailer(survey, surveyTemplate(survey));
-        
+
         // check if email has been sent 
         try {
             // save survey to db
@@ -33,14 +78,10 @@ module.exports = (app) => {
             await survey.save(); // db operation
             req.user.credits -= 1;
             const newUserState = await req.user.save();
-    
-            return res.send(newUserState);
-        } catch(e) {
-            return res.status(422).send({message: e});
-        }
-    });
 
-    app.get('/api/surveys/thanks', (req, res) => {
-        return res.send('Thanks for voting!');
+            return res.send(newUserState);
+        } catch (e) {
+            return res.status(422).send({ message: e });
+        }
     });
 };
