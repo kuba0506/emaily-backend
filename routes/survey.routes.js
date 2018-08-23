@@ -92,4 +92,19 @@ module.exports = (app) => {
             return res.status(422).send({ message: e });
         }
     });
+
+    app.delete('/api/surveys/remove', requireLogin, async (req, res) => {
+        try {
+            const { id } = req.body;
+            let surveys;
+            
+            await Survey.findByIdAndRemove(id);
+            surveys =  await Survey.find({})
+
+            return res.send(surveys);
+
+        } catch(e) {
+            return res.status(500).send({ message: e });
+        }
+    });
 };
